@@ -12,6 +12,6 @@
 
 安装插件依赖即可使用。模型需要支持图像输入。
 
-`review_preference` 可设置为 `positive`、`negative` 或 `neutral`，分别让评价更偏向好评、差评或保持中立。
+`review_tendency` 是 0 到 100 的滑块：0 偏差评，50 中立，100 偏好评。默认提示词要求 AI 只用 1 到 10 个字评价，也可以在 `system_prompt` 中修改。
 
 仅支持 QQ 个人号 `aiocqhttp` 适配器。

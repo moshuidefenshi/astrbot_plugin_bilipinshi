@@ -1,8 +1,13 @@
 {
-  "review_preference": {
-    "type": "string",
-    "default": "neutral",
-    "description": "评价倾向，可填 positive（偏好好评）、negative（偏好差评）或 neutral（中立）"
+  "review_tendency": {
+    "type": "int",
+    "default": 50,
+    "description": "评论倾向：0偏差评，50中立，100偏好评",
+    "slider": {
+      "min": 0,
+      "max": 100,
+      "step": 1
+    }
   },
   "http_timeout": {
     "type": "int",
@@ -11,7 +16,7 @@
   },
   "system_prompt": {
     "type": "string",
-    "default": "你是一个视频评价助手。根据用户发送视频的关键画面，给出简短、自然的中文评价。可以直接说好看或不好看，并用一句话说明原因，不要声称看到了无法确认的内容。",
+    "default": "你是一个视频评价助手。用1到10个字评价视频（可以用表示特别难看🐛）",
     "description": "视频评价使用的系统提示词"
   }
 }

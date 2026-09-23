@@ -95,12 +95,12 @@ class BiliPinshiPlugin(Star):
         return payload.get("data") or {}
 
     def _preference_prompt(self) -> str:
-        preference = str(self.config.get("review_preference", "neutral")).lower()
-        if preference in {"positive", "好评", "偏好好评"}:
-            return "评价倾向偏向好评，优先指出视频有趣、精彩、值得看的地方，但不要违背明显事实。"
-        if preference in {"negative", "差评", "偏好差评"}:
-            return "评价倾向偏向差评，优先指出视频无聊、粗糙、标题夸张或不值得看的地方，但不要恶意编造。"
-        return "保持中立，根据标题和封面呈现出的信息客观评价。"
+        tendency = max(0, min(100, int(self.config.get("review_tendency", 50))))
+        if tendency < 35:
+            return "评论倾向明显偏向差评，优先挑出视频的问题。"
+        if tendency > 65:
+            return "评论倾向明显偏向好评，优先指出视频的优点。"
+        return "评论保持中立，按标题和封面呈现的信息判断。"
 
     async def _analyze(self, event: AstrMessageEvent, metadata: dict[str, Any]) -> str:
         provider = self.context.get_using_provider(event.unified_msg_origin)
@@ -110,8 +110,9 @@ class BiliPinshiPlugin(Star):
         cover = metadata.get("pic") or ""
         if cover.startswith("//"):
             cover = "https:" + cover
-        prompt = "只根据下面这个 B 站视频的标题和封面进行评价，不要假装看过完整视频。\n标题：" + title + "\n" + self._preference_prompt() + "\n请用中文回复两句话以内，并明确说好看、不好看或一般。"
-        response = await self.context.llm_generate(chat_provider_id=provider.meta().id, prompt=prompt, image_urls=[cover] if cover else [], system_prompt="你是一个简短的视频卡片评价助手，只能依据标题和封面作出有限判断。")
+        prompt = "只根据下面这个 B 站视频的标题和封面进行评价，不要假装看过完整视频。\n标题：" + title + "\n" + self._preference_prompt() + "\n严格只输出1到10个中文字，可使用🐛表示特别难看，不要解释。"
+        system_prompt = self.config.get("system_prompt", "你是一个视频评价助手。用1到10个字评价视频（可以用表示特别难看🐛）")
+        response = await self.context.llm_generate(chat_provider_id=provider.meta().id, prompt=prompt, image_urls=[cover] if cover else [], system_prompt=system_prompt)
         text = getattr(response, "completion_text", "") or ""
         return text.strip() or "这个视频我暂时无法判断好不好看。"
 
