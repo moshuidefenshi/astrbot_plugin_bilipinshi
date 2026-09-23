@@ -1,0 +1,2 @@
+# astrbot_plugin_bilipinshi
+让astrbot可以评价你搬的屎
