@@ -2,9 +2,9 @@
 
 让你的bot可以吃你搬的答辩视频回复简短评价，支持 B 站卡片转换。
 
-B 站卡片在开启 `analyze_video` 时会使用 yt-dlp 下载视频、抽取关键帧分析，并回发评价和视频；关闭时只读取标题和封面评价。普通 QQ 视频会自动抽取少量关键帧，FFmpeg 由 `imageio-ffmpeg` 依赖自动提供，不需要手动安装系统 FFmpeg。
+B 站卡片在关闭 `analyze_metadata_only` 时会使用 yt-dlp 下载视频、抽取关键帧分析，并分别回复评价和视频；开启时只读取标题和封面评价，以节省 token。普通 QQ 视频始终抽取少量关键帧，FFmpeg 由 `imageio-ffmpeg` 依赖自动提供，不需要手动安装系统 FFmpeg。
 
-`analyze_video` 可以控制是否分析普通 QQ 视频。开启时，机器人会回复评价文字并回发视频；关闭时，普通视频不会触发插件。
+`analyze_metadata_only` 控制 B 站卡片是否只分析标题和封面。
 
 ## B 站卡片
 

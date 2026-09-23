@@ -1,8 +1,8 @@
 {
-  "analyze_video": {
+  "analyze_metadata_only": {
     "type": "bool",
-    "default": true,
-    "description": "是否分析普通 QQ 视频，并在评价后回发视频"
+    "default": false,
+    "description": "是否只分析 B站卡片的标题和封面以节省 token"
   },
   "review_tendency": {
     "type": "int",
