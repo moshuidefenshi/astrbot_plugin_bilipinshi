@@ -2,7 +2,7 @@ name: astrbot_plugin_bilipinshi
 display_name: 评屎bot
 desc: 让你的bot可以吃你搬的答辩视频回复简短评价，支持 B 站卡片转换。
 version: v1.1.1
-author: OpenAI
+author: msdfs
 support_platforms:
   - aiocqhttp
 astrbot_version: ">=4.5.7,<5"

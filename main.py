@@ -41,7 +41,7 @@ def _card_data(component: Any) -> Any:
     return data
 
 
-@register("astrbot_plugin_bilipinshi", "OpenAI", "让你的bot可以吃你搬的答辩视频回复简短评价，支持 B 站卡片转换。", "1.1.1")
+@register("astrbot_plugin_bilipinshi", "msdfs", "让你的bot可以吃你搬的答辩视频回复简短评价，支持 B 站卡片转换。", "1.1.1")
 class BiliPinshiPlugin(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
