@@ -111,7 +111,7 @@ class BiliPinshiPlugin(Star):
         if cover.startswith("//"):
             cover = "https:" + cover
         prompt = "只根据下面这个 B 站视频的标题和封面进行评价，不要假装看过完整视频。\n标题：" + title + "\n" + self._preference_prompt() + "\n严格只输出1到10个中文字，可使用🐛表示特别难看，不要解释。"
-        system_prompt = self.config.get("system_prompt", "你是一个视频评价助手。用1到10个字评价视频（可以用表示特别难看🐛）")
+        system_prompt = self.config.get("system_prompt", "你是一个视频评价助手。用一句话评价视频（1-10个字，可以用🐛表示不好看）")
         response = await self.context.llm_generate(chat_provider_id=provider.meta().id, prompt=prompt, image_urls=[cover] if cover else [], system_prompt=system_prompt)
         text = getattr(response, "completion_text", "") or ""
         return text.strip() or "这个视频我暂时无法判断好不好看。"
