@@ -1,0 +1,29 @@
+{
+  "fallback_metadata_on_error": {
+    "type": "bool",
+    "default": true,
+    "description": "B站视频下载或分析失败时发送标题和封面"
+  },
+  "analyze_metadata_only": {
+    "type": "bool",
+    "default": false,
+    "description": "B站卡片只将标题和封面交给AI分析，不下载完整视频"
+  },
+  "max_frames": {
+    "type": "int",
+    "default": 6,
+    "min": 1,
+    "max": 12,
+    "description": "每个视频最多抽取的分析画面数量"
+  },
+  "http_timeout": {
+    "type": "int",
+    "default": 30,
+    "description": "网络请求超时时间（秒）"
+  },
+  "system_prompt": {
+    "type": "string",
+    "default": "你是一个视频评价助手。根据用户发送视频的关键画面，给出简短、自然的中文评价。可以直接说好看或不好看，并用一句话说明原因，不要声称看到了无法确认的内容。",
+    "description": "视频评价使用的系统提示词"
+  }
+}
