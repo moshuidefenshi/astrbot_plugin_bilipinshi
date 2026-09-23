@@ -1,20 +1,8 @@
 {
-  "fallback_metadata_on_error": {
-    "type": "bool",
-    "default": true,
-    "description": "B站视频下载或分析失败时发送标题和封面"
-  },
-  "analyze_metadata_only": {
-    "type": "bool",
-    "default": false,
-    "description": "B站卡片只将标题和封面交给AI分析，不下载完整视频"
-  },
-  "max_frames": {
-    "type": "int",
-    "default": 6,
-    "min": 1,
-    "max": 12,
-    "description": "每个视频最多抽取的分析画面数量"
+  "review_preference": {
+    "type": "string",
+    "default": "neutral",
+    "description": "评价倾向，可填 positive（偏好好评）、negative（偏好差评）或 neutral（中立）"
   },
   "http_timeout": {
     "type": "int",
