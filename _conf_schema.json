@@ -14,6 +14,16 @@
     "default": 30,
     "description": "网络请求超时时间（秒）"
   },
+  "video_max_frames": {
+    "type": "int",
+    "default": 6,
+    "description": "普通视频最多抽取的关键帧数量",
+    "slider": {
+      "min": 1,
+      "max": 12,
+      "step": 1
+    }
+  },
   "system_prompt": {
     "type": "string",
     "default": "你是一个视频评价助手。用一句话评价视频（1-10个字，可以用🐛表示不好看）",
