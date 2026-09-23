@@ -179,6 +179,45 @@ class BiliPinshiPlugin(Star):
         )
         return (getattr(response, "completion_text", "") or "这个视频我暂时无法判断好不好看。").strip()
 
+    async def _download_bili_video(self, url: str) -> tuple[Path, dict[str, Any]]:
+        import imageio_ffmpeg
+        import yt_dlp
+
+        output = self.work_dir / "bilibili_%(id)s.%(ext)s"
+        options = {
+            "format": "bv*+ba/b",
+            "outtmpl": str(output),
+            "merge_output_format": "mp4",
+            "ffmpeg_location": imageio_ffmpeg.get_ffmpeg_exe(),
+            "noplaylist": True,
+            "quiet": True,
+            "no_warnings": True,
+            "restrictfilenames": True,
+            "http_headers": {
+                "User-Agent": "Mozilla/5.0",
+                "Referer": "https://www.bilibili.com/",
+            },
+        }
+
+        def download() -> tuple[Path, dict[str, Any]]:
+            with yt_dlp.YoutubeDL(options) as downloader:
+                metadata = downloader.extract_info(url, download=True)
+                prepared = Path(downloader.prepare_filename(metadata))
+                candidates = [prepared, prepared.with_suffix(".mp4")]
+                for candidate in candidates:
+                    if candidate.exists() and candidate.stat().st_size:
+                        return candidate, metadata
+                matches = sorted(
+                    self.work_dir.glob("bilibili_*"),
+                    key=lambda item: item.stat().st_mtime,
+                    reverse=True,
+                )
+                if matches:
+                    return matches[0], metadata
+                raise FileNotFoundError("yt-dlp 未生成视频文件")
+
+        return await asyncio.to_thread(download)
+
     @filter.platform_adapter_type(filter.PlatformAdapterType.AIOCQHTTP)
     @filter.event_message_type(filter.EventMessageType.ALL, priority=20)
     async def on_card(self, event: AstrMessageEvent):
@@ -205,7 +244,21 @@ class BiliPinshiPlugin(Star):
         event.stop_event()
         try:
             metadata = await self._fetch_metadata(url)
-            yield event.plain_result(await self._analyze(event, metadata))
+            if self.config.get("analyze_video", True):
+                video_path, _ = await self._download_bili_video(url)
+                review = await self._analyze_video(event, video_path)
+                yield event.chain_result([
+                    Comp.Plain(review),
+                    Comp.Video.fromFileSystem(path=str(video_path)),
+                ])
+            else:
+                yield event.plain_result(await self._analyze(event, metadata))
         except Exception as exc:
             logger.error("B站卡片评价失败: %s", exc, exc_info=True)
+            if "metadata" in locals() and metadata:
+                try:
+                    yield event.plain_result(await self._analyze(event, metadata))
+                    return
+                except Exception as fallback_exc:
+                    logger.error("B站卡片元数据兜底评价也失败: %s", fallback_exc, exc_info=True)
             yield event.plain_result("这个 B 站卡片暂时无法评价，请稍后再试。")
