@@ -13,7 +13,7 @@ from typing import Any
 import aiohttp
 import astrbot.api.message_components as Comp
 from astrbot.api import AstrBotConfig, logger
-from astrbot.api.event import AstrMessageEvent, filter
+from astrbot.api.event import AstrMessageEvent, MessageChain, filter
 from astrbot.api.star import Context, Star, register
 
 BILI_URL_RE = re.compile(r"(?:https?://)?(?:www\.)?bilibili\.com/video/(?:(BV[0-9A-Za-z]+)|av(\d+))", re.IGNORECASE)
@@ -228,8 +228,8 @@ class BiliPinshiPlugin(Star):
             try:
                 video_path = await self._video_path(video)
                 review = await self._analyze_video(event, video_path)
-                yield event.plain_result(review)
-                yield event.chain_result([Comp.Video.fromFileSystem(path=str(video_path))])
+                await event.send(MessageChain([Comp.Plain(review)]))
+                await event.send(MessageChain([Comp.Video.fromFileSystem(path=str(video_path))]))
             except Exception as exc:
                 logger.error("视频评价失败: %s", exc, exc_info=True)
                 yield event.plain_result("这个视频暂时无法评价，请稍后再试。")
@@ -244,9 +244,10 @@ class BiliPinshiPlugin(Star):
             metadata = await self._fetch_metadata(url)
             if not metadata_only:
                 video_path, _ = await self._download_bili_video(url)
+                logger.info("B站视频下载完成: %s (%d bytes)", video_path, video_path.stat().st_size)
                 review = await self._analyze_video(event, video_path)
-                yield event.plain_result(review)
-                yield event.chain_result([Comp.Video.fromFileSystem(path=str(video_path))])
+                await event.send(MessageChain([Comp.Plain(review)]))
+                await event.send(MessageChain([Comp.Video.fromFileSystem(path=str(video_path))]))
             else:
                 yield event.plain_result(await self._analyze(event, metadata))
         except Exception as exc:
