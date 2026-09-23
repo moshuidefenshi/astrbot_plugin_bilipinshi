@@ -185,9 +185,16 @@ class BiliPinshiPlugin(Star):
         """Only consume Json card messages containing a Bilibili video link."""
         video = next((item for item in event.get_messages() if isinstance(item, Comp.Video)), None)
         if video:
+            if not self.config.get("analyze_video", True):
+                return
             event.stop_event()
             try:
-                yield event.plain_result(await self._analyze_video(event, await self._video_path(video)))
+                video_path = await self._video_path(video)
+                review = await self._analyze_video(event, video_path)
+                yield event.chain_result([
+                    Comp.Plain(review),
+                    Comp.Video.fromFileSystem(path=str(video_path)),
+                ])
             except Exception as exc:
                 logger.error("视频评价失败: %s", exc, exc_info=True)
                 yield event.plain_result("这个视频暂时无法评价，请稍后再试。")
