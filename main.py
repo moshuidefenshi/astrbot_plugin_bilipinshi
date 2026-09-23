@@ -238,9 +238,11 @@ class BiliPinshiPlugin(Star):
         if not url:
             return
         event.stop_event()
+        metadata_only = bool(self.config.get("analyze_metadata_only", False))
+        logger.info("B站卡片处理模式: %s", "标题和封面" if metadata_only else "下载视频并分析关键帧")
         try:
             metadata = await self._fetch_metadata(url)
-            if not self.config.get("analyze_metadata_only", False):
+            if not metadata_only:
                 video_path, _ = await self._download_bili_video(url)
                 review = await self._analyze_video(event, video_path)
                 yield event.plain_result(review)
@@ -249,10 +251,7 @@ class BiliPinshiPlugin(Star):
                 yield event.plain_result(await self._analyze(event, metadata))
         except Exception as exc:
             logger.error("B站卡片评价失败: %s", exc, exc_info=True)
-            if "metadata" in locals() and metadata:
-                try:
-                    yield event.plain_result(await self._analyze(event, metadata))
-                    return
-                except Exception as fallback_exc:
-                    logger.error("B站卡片元数据兜底评价也失败: %s", fallback_exc, exc_info=True)
-            yield event.plain_result("这个 B 站卡片暂时无法评价，请稍后再试。")
+            if metadata_only and "metadata" in locals() and metadata:
+                yield event.plain_result("这个 B 站卡片暂时无法评价，请稍后再试。")
+            else:
+                yield event.plain_result("B 站视频下载或分析失败，请检查 yt-dlp 依赖和网络配置。")
